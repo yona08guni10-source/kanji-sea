@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>IDS Symbol Gallery</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #fff;
+      color: #111;
+      font-family: system-ui, 'Helvetica Neue', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ヘッダー */
+    #header {
+      padding: 32px 48px 24px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    #header h1 {
+      font-size: 13px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(0,0,0,0.3);
+      margin-bottom: 8px;
+    }
+    #header p {
+      font-size: 11px;
+      color: rgba(0,0,0,0.25);
+      letter-spacing: 2px;
+    }
+
+    /* ソースフィルター */
+    #source-bar {
+      display: flex;
+      gap: 6px;
+      padding: 12px 48px 0;
+    }
+    .source-btn {
+      background: none;
+      border: 1px solid rgba(0,0,0,0.15);
+      color: rgba(0,0,0,0.4);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.5px;
+    }
+    .source-btn:hover { border-color: rgba(0,0,0,0.5); color: rgba(0,0,0,0.9); }
+    .source-btn.active { background: #111; border-color: #111; color: #fff; }
+
+    /* テーマフィルター */
+    #filter-bar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 48px 20px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .filter-btn {
+      background: none;
+      border: 1px solid rgba(0,0,0,0.15);
+      color: rgba(0,0,0,0.4);
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.5px;
+    }
+    .filter-btn:hover { border-color: rgba(0,0,0,0.5); color: rgba(0,0,0,0.9); }
+    .filter-btn.active { background: #111; border-color: #111; color: #fff; }
+
+    /* グリッド */
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 2px;
+      padding: 2px;
+      background: rgba(0,0,0,0.06);
+    }
+
+    .card {
+      background: #fff;
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.2s;
+    }
+    .card:hover { background: #f5f5f5; }
+    .card svg {
+      width: 72%;
+      height: 72%;
+    }
+    .card-footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 10px 12px 12px;
+      background: linear-gradient(transparent, rgba(255,255,255,0.95));
+      opacity: 0;
+      transition: opacity 0.2s;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .card:hover .card-footer { opacity: 1; }
+    .card-chars {
+      font-size: 18px;
+      font-family: serif;
+      color: rgba(0,0,0,0.75);
+      letter-spacing: 4px;
+    }
+    .card-theme {
+      font-size: 10px;
+      color: rgba(0,0,0,0.35);
+      letter-spacing: 1px;
+    }
+
+    /* カードのゴミ箱ボタン */
+    .card-trash-btn {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(200,40,40,0.0);
+      border: 1px solid rgba(180,40,40,0.0);
+      color: rgba(180,40,40,0.0);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      padding: 0;
+      line-height: 1;
+      z-index: 10;
+    }
+    .card:hover .card-trash-btn {
+      background: rgba(200,40,40,0.06);
+      border-color: rgba(180,40,40,0.25);
+      color: rgba(180,40,40,0.5);
+    }
+    .card-trash-btn:hover {
+      background: rgba(200,40,40,0.15) !important;
+      border-color: rgba(180,40,40,0.6) !important;
+      color: rgba(180,40,40,0.9) !important;
+    }
+
+    /* ライトボックス */
+    #lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.97);
+      display: none;
+      align-items: center;
+      justify-content: flex-start;
+      z-index: 1000;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+      padding: 56px 20px 40px;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox svg {
+      width: min(70vw, 70vh);
+      height: min(70vw, 70vh);
+    }
+    #lb-theme {
+      font-size: 13px;
+      letter-spacing: 4px;
+      color: rgba(0,0,0,0.35);
+      text-transform: uppercase;
+    }
+    #lb-chars {
+      font-size: 36px;
+      font-family: serif;
+      color: rgba(0,0,0,0.75);
+      letter-spacing: 10px;
+    }
+    #lb-detail {
+      font-size: 11px;
+      color: rgba(0,0,0,0.25);
+      letter-spacing: 2px;
+    }
+    #lb-interpretation {
+      font-size: 13px;
+      color: rgba(0,0,0,0.55);
+      font-family: serif;
+      line-height: 1.8;
+      max-width: 420px;
+      text-align: center;
+      padding: 8px 16px;
+      border-left: 2px solid rgba(0,0,0,0.12);
+      border-right: 2px solid rgba(0,0,0,0.12);
+      letter-spacing: 0.3px;
+    }
+    #lb-close {
+      position: fixed;
+      top: 24px;
+      right: 32px;
+      background: none;
+      border: none;
+      color: rgba(0,0,0,0.25);
+      font-size: 28px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    #lb-close:hover { color: #000; }
+    #lb-nav {
+      display: flex;
+      gap: 20px;
+    }
+    .lb-nav-btn {
+      background: none;
+      border: 1px solid rgba(0,0,0,0.15);
+      color: rgba(0,0,0,0.4);
+      padding: 6px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .lb-nav-btn:hover { border-color: #000; color: #000; }
+
+    /* 採点UI */
+    #lb-score {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      padding: 16px 24px;
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 12px;
+      background: rgba(0,0,0,0.02);
+      min-width: 280px;
+    }
+    .score-field.active label {
+      color: #000;
+      font-weight: 700;
+    }
+    .score-field.active input[type=range] {
+      accent-color: #000;
+    }
+    .score-field.active span {
+      color: #000;
+    }
+    #lb-score-theme {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+    #lb-score-title {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: rgba(0,0,0,0.3);
+      text-transform: uppercase;
+    }
+    .score-field {
+      display: grid;
+      grid-template-columns: 72px 1fr 24px;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+    }
+    .score-field label {
+      font-size: 11px;
+      color: rgba(0,0,0,0.5);
+      letter-spacing: 1px;
+    }
+    .score-field input[type=range] { width: 100%; accent-color: #111; }
+    .score-field span {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111;
+      text-align: right;
+    }
+    #btn-score {
+      background: #111;
+      color: #fff;
+      border: none;
+      padding: 7px 28px;
+      border-radius: 20px;
+      font-size: 12px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    #btn-score:hover { opacity: 0.75; }
+    #score-status {
+      font-size: 11px;
+      color: rgba(0,0,0,0.35);
+      letter-spacing: 1px;
+      min-height: 16px;
+    }
+    /* カード上のスコアバッジ */
+    .score-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.08);
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 10px;
+      color: rgba(0,0,0,0.5);
+      letter-spacing: 0.5px;
+      pointer-events: none;
+    }
+    .source-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 9px;
+      letter-spacing: 0.5px;
+      pointer-events: none;
+    }
+    .source-badge.human {
+      background: rgba(40,120,40,0.1);
+      color: rgba(40,120,40,0.7);
+    }
+    .source-badge.ai {
+      background: rgba(60,60,200,0.08);
+      color: rgba(60,60,200,0.5);
+    }
+    .source-badge.hybrid {
+      background: rgba(160,80,0,0.1);
+      color: rgba(160,80,0,0.7);
+    }
+    .model-version-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 9px;
+      letter-spacing: 0.5px;
+      pointer-events: none;
+      background: rgba(120,0,180,0.12);
+      color: rgba(100,0,160,0.65);
+      font-weight: 700;
+    }
+    #lb-model-version {
+      font-size: 11px;
+      color: rgba(100,0,160,0.6);
+      background: rgba(120,0,180,0.08);
+      border-radius: 8px;
+      padding: 3px 10px;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+    #lb-ai-comment {
+      font-size: 12px;
+      color: rgba(180,100,0,0.75);
+      background: rgba(255,200,100,0.12);
+      border-left: 3px solid rgba(200,140,0,0.35);
+      border-radius: 4px;
+      padding: 5px 10px;
+      margin: 6px 0;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    /* 解釈エリア */
+    #lb-interp-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      max-width: 420px;
+      width: 100%;
+    }
+    #lb-interp-edit-form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    #lb-interp-textarea {
+      width: 100%;
+      font-size: 13px;
+      font-family: serif;
+      color: #334;
+      line-height: 1.8;
+      background: rgba(0,0,60,0.02);
+      border: 1px solid rgba(0,0,60,0.15);
+      border-radius: 6px;
+      padding: 10px 14px;
+      resize: vertical;
+      min-height: 80px;
+      letter-spacing: 0.3px;
+    }
+    #lb-interp-textarea:focus { outline: none; border-color: rgba(0,0,180,0.3); }
+    .lb-interp-btns {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+    #lb-interp-save-btn {
+      background: #111;
+      color: #fff;
+      border: none;
+      padding: 6px 22px;
+      border-radius: 20px;
+      font-size: 12px;
+      letter-spacing: 1px;
+      cursor: pointer;
+    }
+    #lb-interp-save-btn:hover { opacity: 0.75; }
+    #lb-interp-cancel-btn, #lb-interp-edit-btn, #lb-interp-add-btn {
+      background: none;
+      border: 1px solid rgba(0,0,0,0.15);
+      color: rgba(0,0,0,0.45);
+      padding: 5px 16px;
+      border-radius: 20px;
+      font-size: 11px;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+    }
+    #lb-interp-cancel-btn:hover, #lb-interp-edit-btn:hover, #lb-interp-add-btn:hover {
+      border-color: rgba(0,0,0,0.4); color: rgba(0,0,0,0.8);
+    }
+    /* カード解釈プレビュー */
+    .card-interp {
+      font-size: 10px;
+      color: rgba(0,0,0,0.45);
+      letter-spacing: 0.3px;
+      line-height: 1.5;
+      font-family: serif;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      text-align: left;
+    }
+    /* ライトボックスの手作りラベル */
+    #lb-human-label {
+      font-size: 12px;
+      color: rgba(40,120,40,0.8);
+      letter-spacing: 2px;
+      padding: 8px 20px;
+      border: 1px solid rgba(40,120,40,0.3);
+      border-radius: 20px;
+    }
+
+    /* ゴミ箱ボタン */
+    #btn-trash-view {
+      margin-left: auto;
+      border-color: rgba(180,40,40,0.2);
+      color: rgba(160,30,30,0.5);
+    }
+    #btn-trash-view:hover  { border-color: rgba(180,40,40,0.6); color: rgba(160,30,30,0.9); }
+    #btn-trash-view.active { background: rgba(200,40,40,0.85); border-color: transparent; color: #fff; }
+
+    /* ゴミ箱モードのヘッダーバナー */
+    #trash-banner {
+      display: none;
+      padding: 10px 48px;
+      background: rgba(200,40,40,0.06);
+      border-bottom: 1px solid rgba(200,40,40,0.15);
+      font-size: 12px;
+      color: rgba(160,30,30,0.7);
+      letter-spacing: 2px;
+    }
+    #trash-banner.show { display: block; }
+
+    /* クラスターフィルターバナー */
+    #cluster-banner {
+      display: none;
+      padding: 10px 48px;
+      background: rgba(40,80,180,0.06);
+      border-bottom: 1px solid rgba(40,80,180,0.15);
+      font-size: 12px;
+      color: rgba(30,60,160,0.75);
+      letter-spacing: 1px;
+      align-items: center;
+      gap: 12px;
+    }
+    #cluster-banner.show { display: flex; }
+    #cluster-banner-name { flex: 1; }
+    #cluster-banner-clear {
+      background: none;
+      border: 1px solid rgba(40,80,180,0.25);
+      color: rgba(30,60,160,0.6);
+      padding: 3px 12px;
+      border-radius: 12px;
+      font-size: 10px;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+    #cluster-banner-clear:hover { border-color: rgba(40,80,180,0.6); color: rgba(30,60,160,1); }
+
+    /* カードのゴミ箱オーバーレイ */
+    .card.trashed { opacity: 0.65; }
+    .card.trashed:hover { opacity: 1; }
+
+    /* ライトボックス ゴミ箱・復元ボタン */
+    #lb-trash-btn {
+      background: none;
+      border: 1px solid rgba(180,40,40,0.2);
+      color: rgba(160,30,30,0.45);
+      padding: 6px 20px;
+      border-radius: 20px;
+      font-size: 11px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+    #lb-trash-btn:hover { border-color: rgba(180,40,40,0.7); color: rgba(160,30,30,0.9); }
+    #lb-restore-btn {
+      background: rgba(40,120,40,0.1);
+      border: 1px solid rgba(40,120,40,0.3);
+      color: rgba(30,100,30,0.8);
+      padding: 8px 28px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+    #lb-restore-btn:hover { background: rgba(40,120,40,0.2); border-color: rgba(40,120,40,0.6); }
+    #lb-trash-info {
+      font-size: 10px;
+      color: rgba(0,0,0,0.25);
+      letter-spacing: 1px;
+    }
+
+    #loading {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.2);
+      font-size: 12px;
+      letter-spacing: 3px;
+    }
+
+    /* 研究ボタン */
+    #btn-research-view {
+      margin-left: 8px;
+      border-color: rgba(40,80,180,0.2);
+      color: rgba(30,60,160,0.5);
+    }
+    #btn-research-view:hover  { border-color: rgba(40,80,180,0.6); color: rgba(30,60,160,0.9); }
+    #btn-research-view.active { background: rgba(40,80,180,0.85); border-color: transparent; color: #fff; }
+
+    /* 研究パネル */
+    #research-panel {
+      display: none;
+      padding: 32px 48px 48px;
+    }
+    #research-panel.show { display: block; }
+    #research-panel h2 {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(0,0,0,0.3);
+      margin-bottom: 4px;
+    }
+    #research-meta {
+      font-size: 10px;
+      color: rgba(0,0,0,0.25);
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    #btn-research-run {
+      background: none;
+      border: 1px solid rgba(40,80,180,0.3);
+      color: rgba(30,60,160,0.7);
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+    #btn-research-run:hover { border-color: rgba(40,80,180,0.8); color: rgba(30,60,160,1); }
+    #btn-research-run:disabled { opacity: 0.4; cursor: default; }
+    #research-philosophy {
+      background: rgba(40,80,180,0.04);
+      border: 1px solid rgba(40,80,180,0.1);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: rgba(0,0,0,0.65);
+    }
+    #research-philosophy strong {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(0,0,0,0.3);
+      margin-bottom: 8px;
+    }
+    #research-patterns-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .research-card {
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 8px;
+      padding: 16px 18px;
+      background: #fafafa;
+    }
+    .research-card-header {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .research-card-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #111;
+    }
+    .research-card-tag {
+      font-size: 10px;
+      color: rgba(40,80,180,0.6);
+      letter-spacing: 1px;
+      background: rgba(40,80,180,0.06);
+      border: 1px solid rgba(40,80,180,0.15);
+      border-radius: 12px;
+      padding: 1px 8px;
+    }
+    .research-card-count {
+      margin-left: auto;
+      font-size: 10px;
+      color: rgba(0,0,0,0.3);
+      letter-spacing: 1px;
+    }
+    .research-card-desc {
+      font-size: 12px;
+      line-height: 1.6;
+      color: rgba(0,0,0,0.6);
+      margin-bottom: 8px;
+    }
+    .research-card-effect {
+      font-size: 11px;
+      color: rgba(0,0,0,0.4);
+      line-height: 1.5;
+      border-left: 2px solid rgba(40,80,180,0.2);
+      padding-left: 8px;
+      margin-bottom: 8px;
+    }
+    .research-card-chars {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .research-char-chip {
+      font-size: 13px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 4px;
+      padding: 1px 6px;
+      color: rgba(0,0,0,0.7);
+    }
+    .research-card-examples {
+      margin-top: 8px;
+      font-size: 10px;
+      color: rgba(0,0,0,0.3);
+      letter-spacing: 0.5px;
+      line-height: 1.5;
+    }
+    .research-card-potential {
+      font-size: 11px;
+      color: rgba(80,40,160,0.6);
+      line-height: 1.5;
+      margin-top: 6px;
+      font-style: italic;
+    }
+    .research-modifier-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .research-section-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(0,0,0,0.3);
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+    /* discovery cards – slightly different styling */
+    .discovery-card {
+      border: 1px solid rgba(80,40,160,0.12);
+      border-radius: 8px;
+      padding: 16px 18px;
+      background: #fafafe;
+      position: relative;
+    }
+    .discovery-card.high-novelty {
+      border-color: rgba(80,40,160,0.35);
+      background: rgba(80,40,160,0.03);
+    }
+    .discovery-novelty-bar {
+      position: absolute;
+      top: 0; left: 0;
+      height: 3px;
+      border-radius: 8px 8px 0 0;
+      background: linear-gradient(90deg, rgba(80,40,160,0.4), rgba(40,80,200,0.6));
+    }
+    .discovery-card-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 4px;
+    }
+    .discovery-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .discovery-novelty-badge {
+      font-size: 9px;
+      letter-spacing: 1px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(80,40,160,0.3);
+      color: rgba(80,40,160,0.7);
+    }
+    .discovery-count {
+      font-size: 10px;
+      color: rgba(0,0,0,0.3);
+      letter-spacing: 1px;
+    }
+    .discovery-algorithm {
+      font-size: 12px;
+      line-height: 1.7;
+      color: rgba(0,0,0,0.65);
+      margin-bottom: 8px;
+    }
+    .discovery-visual {
+      font-size: 11px;
+      color: rgba(0,0,0,0.45);
+      line-height: 1.5;
+      border-left: 2px solid rgba(80,40,160,0.2);
+      padding-left: 8px;
+      margin-bottom: 8px;
+    }
+    .discovery-novel-aspect {
+      font-size: 11px;
+      color: rgba(80,40,160,0.75);
+      font-style: italic;
+      margin-bottom: 6px;
+    }
+    .discovery-rule-dist {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .discovery-rule-chip {
+      font-size: 9px;
+      color: rgba(0,0,0,0.35);
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 10px;
+      padding: 1px 7px;
+    }
+    .discovery-examples {
+      margin-top: 8px;
+      font-size: 10px;
+      color: rgba(0,0,0,0.28);
+      line-height: 1.6;
+    }
+    #research-discoveries-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+    }
+    .research-mod-chip {
+      font-size: 9px;
+      color: rgba(0,0,0,0.35);
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 10px;
+      padding: 1px 7px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading">LOADING...</div>
+
+<div id="header" style="display:none">
+  <h1>IDS Symbol Archive</h1>
+  <p id="header-detail"></p>
+</div>
+<div id="source-bar" style="display:none">
+  <button class="source-btn active" data-source="all">すべて</button>
+  <button class="source-btn" data-source="human">手作り</button>
+  <button class="source-btn" data-source="ai">AI提案</button>
+  <button class="source-btn" data-source="hybrid">手作り+AI</button>
+  <button id="btn-trash-view" class="source-btn">ゴミ箱</button>
+  <button id="btn-research-view" class="source-btn">研究</button>
+</div>
+<div id="filter-bar" style="display:none"></div>
+<div id="trash-banner">ゴミ箱 — 復元するにはカードをクリックしてください。次回のファインチューニングには使用されません。</div>
+<div id="cluster-banner">
+  <span id="cluster-banner-name"></span>
+  <button id="cluster-banner-clear">すべて表示 ×</button>
+</div>
+
+<!-- 研究パネル -->
+<div id="research-panel">
+  <h2>Structural Pattern Research</h2>
+  <div id="research-meta">
+    <span id="research-timestamp">未解析</span>
+    <button id="btn-research-run">再解析</button>
+    <span id="research-status"></span>
+  </div>
+  <div id="research-philosophy"></div>
+  <div class="research-section-label" id="research-label-patterns">既知構造パターン（ルールベース分類）</div>
+  <div id="research-patterns-grid"></div>
+  <div class="research-section-label" id="research-label-discoveries" style="margin-top:40px">
+    自律発見クラスタ（機械学習による構造発見）
+    <span style="font-weight:400;font-size:10px;margin-left:8px;letter-spacing:1px">新規性スコアが高いほど既存IDS分類に当てはまらない未知構造</span>
+  </div>
+  <div id="research-discoveries-grid"></div>
+</div>
+
+<div id="grid"></div>
+
+<!-- ライトボックス -->
+<div id="lightbox">
+  <button id="lb-close">×</button>
+  <div id="lb-theme"></div>
+  <div id="lb-svg-wrap"></div>
+  <div id="lb-chars"></div>
+  <div id="lb-detail"></div>
+  <div id="lb-interp-area">
+    <div id="lb-interpretation" style="display:none"></div>
+    <div id="lb-interp-edit-form" style="display:none">
+      <textarea id="lb-interp-textarea" placeholder="なぜこの漢字を選んだか…"></textarea>
+      <div class="lb-interp-btns">
+        <button id="lb-interp-save-btn">保存</button>
+        <button id="lb-interp-cancel-btn">キャンセル</button>
+      </div>
+    </div>
+    <div class="lb-interp-btns">
+      <button id="lb-interp-add-btn" style="display:none">＋ 解釈を追加</button>
+      <button id="lb-interp-edit-btn" style="display:none">編集</button>
+    </div>
+  </div>
+  <div id="lb-ai-comment" style="display:none"></div>
+  <div id="lb-model-version" style="display:none"></div>
+  <div id="lb-human-label" style="display:none">手作りサンプル</div>
+  <div id="lb-score">
+    <div id="lb-score-theme"></div>
+    <div id="lb-score-title">採点</div>
+    <div class="score-field">
+      <label>グラフィック</label>
+      <input type="range" id="sc-graphic" min="0" max="9" step="1" value="5">
+      <span id="val-graphic">5</span>
+    </div>
+    <div class="score-field">
+      <label>抽象化</label>
+      <input type="range" id="sc-abstract" min="0" max="9" step="1" value="5">
+      <span id="val-abstract">5</span>
+    </div>
+    <button id="btn-score">採点を保存</button>
+    <span id="score-status"></span>
+  </div>
+  <div id="lb-actions" style="display:none">
+    <button id="lb-trash-btn">ゴミ箱へ</button>
+    <button id="lb-restore-btn" style="display:none">復元する</button>
+    <div id="lb-trash-info"></div>
+  </div>
+  <div id="lb-nav">
+    <button class="lb-nav-btn" id="lb-prev">← 前</button>
+    <button class="lb-nav-btn" id="lb-next">次 →</button>
+  </div>
+</div>
+
+<script type="module">
+
+// ===== SVG描画 =====
+const CANVAS_SIZE = 109;
+
+function makeTransform(inst) {
+  const sx = (inst.scale * inst.scaleX).toFixed(4);
+  const sy = (inst.scale * inst.scaleY).toFixed(4);
+  const t = inst.transform;
+  const cx = t.cx ?? inst.cx ?? CANVAS_SIZE / 2;
+  const cy = t.cy ?? inst.cy ?? CANVAS_SIZE / 2;
+  return [
+    `translate(${t.tx + cx},${t.ty + cy})`,
+    `rotate(${t.rotate})`,
+    `scale(${sx},${sy})`,
+    `translate(${-cx},${-cy})`,
+  ].join(' ');
+}
+
+// KanjiVGキャッシュ
+const svgCache = new Map();
+async function loadPaths(code) {
+  if (svgCache.has(code)) return svgCache.get(code);
+  try {
+    const res = await fetch(`/data/kanjivg/kanji_${code}.svg`);
+    if (!res.ok) return [];
+    const text = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'image/svg+xml');
+    const paths = Array.from(doc.querySelectorAll('path')).map(p => p.getAttribute('d'));
+    svgCache.set(code, paths);
+    return paths;
+  } catch { return []; }
+}
+
+async function renderSymbolSVG(record, size = 109) {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${CANVAS_SIZE} ${CANVAS_SIZE}`);
+  svg.setAttribute('width', size);
+  svg.setAttribute('height', size);
+  svg.setAttribute('xmlns', ns);
+
+  const bg = document.createElementNS(ns, 'rect');
+  bg.setAttribute('width', CANVAS_SIZE); bg.setAttribute('height', CANVAS_SIZE);
+  bg.setAttribute('fill', '#fff');
+  svg.appendChild(bg);
+
+  const COLORS = ['#c44','#4477cc','#228822','#9933aa','#cc7700'];
+  for (let ci = 0; ci < record.instances.length; ci++) {
+    const inst = record.instances[ci];
+    const t = inst.transform;
+    const paths = await loadPaths(inst.code);
+    if (!paths.length) continue;
+
+    const g = document.createElementNS(ns, 'g');
+    g.classList.add('spread-target');
+
+    // cx/cy が保存されていない古いデータはデフォルト値
+    const cx = t.cx ?? CANVAS_SIZE / 2;
+    const cy = t.cy ?? CANVAS_SIZE / 2;
+    const sx = ((t.scale ?? 1) * (t.scaleX ?? 1)).toFixed(4);
+    const sy = ((t.scale ?? 1) * (t.scaleY ?? 1)).toFixed(4);
+    g.setAttribute('transform', [
+      `translate(${(t.tx ?? 0) + cx},${(t.ty ?? 0) + cy})`,
+      `rotate(${t.rotate ?? 0})`,
+      `scale(${sx},${sy})`,
+      `translate(${-cx},${-cy})`,
+    ].join(' '));
+
+    const color = COLORS[ci % COLORS.length];
+    const removedSet = new Set(
+      inst.strokes.filter(s => s.op === 'remove').map(s => s.index)
+    );
+
+    // 膜（membrane）: ベクターパスに沿った半透明ブロブ
+    paths.forEach((d, i) => {
+      if (removedSet.has(i)) return;
+      const mp = document.createElementNS(ns, 'path');
+      mp.setAttribute('d', d);
+      mp.setAttribute('fill', 'none');
+      mp.setAttribute('stroke', color);
+      mp.setAttribute('stroke-width', '8');
+      mp.setAttribute('stroke-linecap', 'round');
+      mp.setAttribute('stroke-linejoin', 'round');
+      mp.setAttribute('opacity', '0.09');
+      g.appendChild(mp);
+    });
+
+    paths.forEach((d, i) => {
+      if (removedSet.has(i)) return;
+      const path = document.createElementNS(ns, 'path');
+      path.setAttribute('d', d);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', color);
+      path.setAttribute('stroke-width', '2.5');
+      path.setAttribute('stroke-linecap', 'round');
+      path.setAttribute('stroke-linejoin', 'round');
+      g.appendChild(path);
+    });
+    svg.appendChild(g);
+  }
+
+  // spreadX/Y: getBBox はDOM上でないと動かないので一時マウントして計測
+  const needsSpread = record.instances.some(i => i.transform?.spreadX || i.transform?.spreadY);
+  if (needsSpread) {
+    const host = document.createElement('div');
+    host.style.cssText = 'position:absolute;opacity:0;pointer-events:none;left:-9999px';
+    document.body.appendChild(host);
+    host.appendChild(svg);
+
+    record.instances.forEach((inst, ci) => {
+      const t = inst.transform;
+      if (!t?.spreadX && !t?.spreadY) return;
+      const cx = t.cx ?? CANVAS_SIZE / 2;
+      const cy = t.cy ?? CANVAS_SIZE / 2;
+      const g = svg.querySelectorAll('g.spread-target')[ci];
+      if (!g) return;
+      g.querySelectorAll('path').forEach(p => {
+        const bb = p.getBBox();
+        const pcx = bb.x + bb.width  / 2;
+        const pcy = bb.y + bb.height / 2;
+        const dx = t.spreadX ? Math.sign(pcx - cx) * t.spreadX : 0;
+        const dy = t.spreadY ? Math.sign(pcy - cy) * t.spreadY : 0;
+        if (!dx && !dy) return;
+        const existing = p.getAttribute('transform');
+        p.setAttribute('transform', existing
+          ? `translate(${dx.toFixed(2)},${dy.toFixed(2)}) ${existing}`
+          : `translate(${dx.toFixed(2)},${dy.toFixed(2)})`);
+      });
+    });
+
+    host.removeChild(svg);
+    document.body.removeChild(host);
+  }
+
+  return svg;
+}
+
+// ===== ギャラリー =====
+let allRecords = [];
+let filtered = [];
+let currentIndex = 0;
+let currentThemeFilter = 'all';
+let currentSourceFilter = 'all';
+let trashMode = false;
+let trashRecords = [];
+let researchClusterFilter = null;  // { name, record_ids: Set }
+
+async function init() {
+  const res = await fetch('/api/results');
+  allRecords = await res.json();
+  // 新しい順
+  allRecords.reverse();
+
+  const themes = [...new Set(allRecords.map(r => r.theme).filter(Boolean))];
+  const humanCount  = allRecords.filter(r => r.source === 'human').length;
+  const aiCount     = allRecords.filter(r => r.source === 'ai').length;
+  const hybridCount = allRecords.filter(r => r.source === 'hybrid').length;
+
+  // ヘッダー
+  document.getElementById('header-detail').textContent =
+    `${allRecords.length} symbols · ${themes.length} themes · 手作り${humanCount} AI${aiCount} 手作り+AI${hybridCount}`;
+  document.getElementById('header').style.display = '';
+  document.getElementById('loading').style.display = 'none';
+
+  // ソースフィルター（ゴミ箱ボタン除く）
+  document.getElementById('source-bar').style.display = '';
+  document.querySelectorAll('.source-btn[data-source]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (trashMode) exitTrashMode();
+      if (document.getElementById('research-panel').classList.contains('show')) exitResearchMode();
+      document.querySelectorAll('.source-btn[data-source]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSourceFilter = btn.dataset.source;
+      applyFilter(currentThemeFilter);
+    });
+  });
+
+  // ゴミ箱ボタン
+  document.getElementById('btn-trash-view').addEventListener('click', () => {
+    if (trashMode) exitTrashMode();
+    else enterTrashMode();
+  });
+
+  // テーマフィルター
+  const filterBar = document.getElementById('filter-bar');
+  filterBar.style.display = '';
+  const allBtn = makeFilterBtn('すべて', 'all', true);
+  filterBar.appendChild(allBtn);
+  themes.forEach(t => filterBar.appendChild(makeFilterBtn(t, t, false)));
+
+  applyFilter('all');
+}
+
+function makeFilterBtn(label, value, active) {
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn' + (active ? ' active' : '');
+  btn.textContent = label;
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilter(value);
+  });
+  return btn;
+}
+
+async function applyFilter(theme) {
+  currentThemeFilter = theme;
+  filtered = allRecords.filter(r => {
+    if (researchClusterFilter) {
+      const key = r.symbol_id || r.timestamp || '';
+      if (!researchClusterFilter.record_ids.has(key)) return false;
+    }
+    return (theme === 'all' || r.theme === theme) &&
+           (currentSourceFilter === 'all' || r.source === currentSourceFilter);
+  });
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for (let i = 0; i < filtered.length; i++) {
+    const card = await makeCard(filtered[i], i);
+    grid.appendChild(card);
+  }
+}
+
+async function makeCard(record, index) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  const svg = await renderSymbolSVG(record, 109);
+  card.appendChild(svg);
+
+  const footer = document.createElement('div');
+  footer.className = 'card-footer';
+
+  const chars = document.createElement('div');
+  chars.className = 'card-chars';
+  chars.textContent = record.instances.map(i => i.char).join('');
+  footer.appendChild(chars);
+
+  const theme = document.createElement('div');
+  theme.className = 'card-theme';
+  theme.textContent = record.theme || '';
+  footer.appendChild(theme);
+
+  if (record.interpretation) {
+    const interp = document.createElement('div');
+    interp.className = 'card-interp';
+    interp.textContent = record.interpretation;
+    footer.appendChild(interp);
+  }
+
+  card.appendChild(footer);
+
+  if (record.score) {
+    const badge = document.createElement('div');
+    badge.className = 'score-badge';
+    badge.textContent = `G${record.score.graphic} A${record.score.abstraction}`;
+    card.appendChild(badge);
+  }
+
+  const srcBadge = document.createElement('div');
+  const srcClass = record.source === 'human' ? 'human' : record.source === 'hybrid' ? 'hybrid' : 'ai';
+  const srcLabel = record.source === 'human' ? '手作り' : record.source === 'hybrid' ? '手作り+AI' : 'AI';
+  srcBadge.className = `source-badge ${srcClass}`;
+  srcBadge.textContent = srcLabel;
+  card.appendChild(srcBadge);
+
+  if (record.model_version) {
+    const mvBadge = document.createElement('div');
+    mvBadge.className = 'model-version-badge';
+    mvBadge.textContent = record.model_version;
+    card.appendChild(mvBadge);
+  }
+
+  // ゴミ箱 / 復元ボタン
+  const trashBtn = document.createElement('button');
+  trashBtn.className = 'card-trash-btn';
+  trashBtn.title = trashMode ? '復元' : 'ゴミ箱へ';
+  trashBtn.textContent = trashMode ? '↩' : '×';
+  trashBtn.addEventListener('click', async e => {
+    e.stopPropagation();
+    if (trashMode) {
+      const res = await fetch('/api/restore', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ symbol_id: record.symbol_id, timestamp: record.timestamp }),
+      });
+      const data = await res.json();
+      if (!data.ok) return;
+      trashRecords = trashRecords.filter(r => r !== record);
+      filtered     = filtered.filter(r    => r !== record);
+      card.remove();
+      if (filtered.length === 0) exitTrashMode();
+    } else {
+      const res = await fetch('/api/trash', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ symbol_id: record.symbol_id, timestamp: record.timestamp }),
+      });
+      const data = await res.json();
+      if (!data.ok) return;
+      allRecords = allRecords.filter(r => r !== record);
+      filtered   = filtered.filter(r   => r !== record);
+      card.remove();
+    }
+  });
+  card.appendChild(trashBtn);
+
+  card.addEventListener('click', () => {
+    const idx = filtered.indexOf(record);
+    if (idx !== -1) openLightbox(idx);
+  });
+  return card;
+}
+
+// ===== ライトボックス =====
+async function openLightbox(index) {
+  currentIndex = index;
+  await renderLightbox();
+  document.getElementById('lightbox').classList.add('open');
+  resetScoreState();
+}
+
+async function renderLightbox() {
+  const record = filtered[currentIndex];
+  const wrap = document.getElementById('lb-svg-wrap');
+  wrap.innerHTML = '';
+  const svg = await renderSymbolSVG(record, 400);
+  wrap.appendChild(svg);
+
+  document.getElementById('lb-theme').textContent = record.theme || '';
+  document.getElementById('lb-score-theme').textContent = record.theme || '';
+  document.getElementById('lb-chars').textContent = record.instances.map(i => i.char).join('');
+  const kept = record.instances.reduce((s, i) => s + i.abstraction.kept, 0);
+  document.getElementById('lb-detail').textContent = `${kept}画`;
+
+  // 次の記号を先読み（バックグラウンド）
+  const nextIdx = (currentIndex + 1) % filtered.length;
+  if (filtered[nextIdx]) renderSymbolSVG(filtered[nextIdx], 400).catch(() => {});
+
+  // 解釈エリアリセット
+  const interpEl = document.getElementById('lb-interpretation');
+  const editForm  = document.getElementById('lb-interp-edit-form');
+  const addBtn    = document.getElementById('lb-interp-add-btn');
+  const editBtn   = document.getElementById('lb-interp-edit-btn');
+  editForm.style.display = 'none';
+  if (record.interpretation) {
+    interpEl.textContent = record.interpretation;
+    interpEl.style.display = '';
+    addBtn.style.display = 'none';
+    editBtn.style.display = '';
+  } else {
+    interpEl.style.display = 'none';
+    addBtn.style.display = '';
+    editBtn.style.display = 'none';
+  }
+
+  // 修正前感想（hybridのみ）
+  const aiCommentEl = document.getElementById('lb-ai-comment');
+  if (record.ai_comment) {
+    aiCommentEl.textContent = '修正前: ' + record.ai_comment;
+    aiCommentEl.style.display = '';
+  } else {
+    aiCommentEl.style.display = 'none';
+  }
+
+  // モデルバージョンバッジ
+  const mvEl = document.getElementById('lb-model-version');
+  if (record.model_version) {
+    mvEl.textContent = record.model_version;
+    mvEl.style.display = '';
+  } else {
+    mvEl.style.display = 'none';
+  }
+
+  // ゴミ箱/復元ボタン
+  const actionsEl    = document.getElementById('lb-actions');
+  const trashBtnEl   = document.getElementById('lb-trash-btn');
+  const restoreBtnEl = document.getElementById('lb-restore-btn');
+  const trashInfoEl  = document.getElementById('lb-trash-info');
+  actionsEl.style.display = '';
+  if (trashMode) {
+    trashBtnEl.style.display   = 'none';
+    restoreBtnEl.style.display = '';
+    trashInfoEl.textContent    = record._trashed_at
+      ? `ゴミ箱に入れた日時: ${new Date(record._trashed_at).toLocaleString('ja-JP')}`
+      : '';
+  } else {
+    trashBtnEl.style.display   = '';
+    restoreBtnEl.style.display = 'none';
+    trashInfoEl.textContent    = '';
+  }
+
+  // ソース別UI切り替え
+  const isHuman = record.source === 'human';
+  document.getElementById('lb-score').style.display       = (isHuman || trashMode) ? 'none' : '';
+  document.getElementById('lb-human-label').style.display = (isHuman && !trashMode) ? '' : 'none';
+
+  if (!isHuman) {
+    // 既存スコアを反映
+    const g = record.score?.graphic  ?? 5;
+    const a = record.score?.abstraction ?? 5;
+    document.getElementById('sc-graphic').value  = g;
+    document.getElementById('sc-abstract').value = a;
+    document.getElementById('val-graphic').textContent  = g;
+    document.getElementById('val-abstract').textContent = a;
+    document.getElementById('score-status').textContent =
+      record.score ? `採点済み G${record.score.graphic} A${record.score.abstraction}` : '';
+  }
+}
+
+// スライダーリアルタイム表示
+document.getElementById('sc-graphic').addEventListener('input', e => {
+  document.getElementById('val-graphic').textContent = e.target.value;
+});
+document.getElementById('sc-abstract').addEventListener('input', e => {
+  document.getElementById('val-abstract').textContent = e.target.value;
+});
+
+// 採点保存（内部共通関数）
+// overrideRecord: レコード参照を直接渡す（undoなど）、省略時は currentIndex を使用
+async function saveScore(graphic, abstraction, overrideRecord, remove = false) {
+  const record = overrideRecord ?? filtered[currentIndex];
+  if (!record || record.source === 'human') return false;
+  if (!record.symbol_id && !record.timestamp) return false;
+  try {
+    const res = await fetch('/api/score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        symbol_id:  record.symbol_id  || null,
+        timestamp:  record.timestamp  || null,
+        graphic:    remove ? null : graphic,
+        abstraction: remove ? null : abstraction,
+        remove,
+      }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      if (remove) { delete record.score; }
+      else { record.score = { graphic, abstraction }; }
+      // カードバッジ更新
+      const idx = filtered.indexOf(record);
+      const cards = document.querySelectorAll('#grid .card');
+      const card = cards[idx];
+      if (card) {
+        let badge = card.querySelector('.score-badge');
+        if (remove) { badge?.remove(); }
+        else {
+          if (!badge) { badge = document.createElement('div'); badge.className = 'score-badge'; card.appendChild(badge); }
+          badge.textContent = `G${graphic} A${abstraction}`;
+        }
+      }
+      return true;
+    }
+  } catch (_) {}
+  return false;
+}
+
+document.getElementById('btn-score').addEventListener('click', async () => {
+  const g = +document.getElementById('sc-graphic').value;
+  const a = +document.getElementById('sc-abstract').value;
+  const ok = await saveScore(g, a);
+  document.getElementById('score-status').textContent = ok ? `保存 G${g} A${a}` : 'IDなし';
+});
+
+// ===== キーボード採点ステートマシン =====
+// 状態: 'graphic' → 'abstraction' → 'confirm' → (Enter で保存・次へ)
+let scoreState = 'graphic';
+let pendingGraphic = null;
+let pendingAbstraction = null;
+let scoreUndoStack = []; // [{index, prevScore}]
+
+function setScoreState(state) {
+  scoreState = state;
+  const gField = document.querySelector('.score-field:nth-child(2)');
+  const aField = document.querySelector('.score-field:nth-child(3)');
+  const hints = { graphic: '0-9: グラフィック採点', abstraction: '0-9: 抽象化採点', confirm: 'Enter: 確定して次へ' };
+  if (gField) gField.classList.toggle('active', state === 'graphic');
+  if (aField) aField.classList.toggle('active', state === 'abstraction' || state === 'confirm');
+  document.getElementById('score-status').textContent = hints[state] ?? '';
+}
+
+function resetScoreState() {
+  pendingGraphic = null;
+  pendingAbstraction = null;
+  const record = filtered[currentIndex];
+  if (record?.source === 'human') {
+    scoreState = 'graphic';
+    return;
+  }
+  if (record?.score) {
+    document.getElementById('sc-graphic').value  = record.score.graphic;
+    document.getElementById('sc-abstract').value = record.score.abstraction;
+    document.getElementById('val-graphic').textContent  = record.score.graphic;
+    document.getElementById('val-abstract').textContent = record.score.abstraction;
+    document.getElementById('score-status').textContent =
+      `採点済み G${record.score.graphic} A${record.score.abstraction}`;
+    const gField = document.querySelector('.score-field:nth-child(2)');
+    const aField = document.querySelector('.score-field:nth-child(3)');
+    if (gField) gField.classList.remove('active');
+    if (aField) aField.classList.remove('active');
+    scoreState = 'graphic';
+  } else {
+    setScoreState('graphic');
+  }
+}
+
+document.getElementById('lb-close').addEventListener('click', () => {
+  document.getElementById('lightbox').classList.remove('open');
+});
+document.getElementById('lb-prev').addEventListener('click', async () => {
+  currentIndex = (currentIndex - 1 + filtered.length) % filtered.length;
+  await renderLightbox();
+});
+document.getElementById('lb-next').addEventListener('click', async () => {
+  currentIndex = (currentIndex + 1) % filtered.length;
+  await renderLightbox();
+});
+document.addEventListener('keydown', async e => {
+  if (!document.getElementById('lightbox').classList.contains('open')) return;
+
+  // Ctrl+Z: 直前の採点を取り消して戻る
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+    e.preventDefault();
+    if (scoreUndoStack.length === 0) return;
+    const { index, prevScore } = scoreUndoStack.pop();
+    const target = filtered[index];
+    if (target) {
+      if (prevScore === null) {
+        delete target.score;
+      } else {
+        target.score = prevScore;
+      }
+      await saveScore(
+        target.score?.graphic ?? null,
+        target.score?.abstraction ?? null,
+        target,
+        prevScore === null
+      );
+    }
+    currentIndex = index;
+    await renderLightbox();
+    resetScoreState();
+    document.getElementById('score-status').textContent = '↩ 採点を取り消しました';
+    return;
+  }
+
+  // 数字キー: 採点ステートマシン（AIレコードのみ）
+  if (/^[0-9]$/.test(e.key) && filtered[currentIndex]?.source !== 'human') {
+    const n = +e.key;
+    if (scoreState === 'graphic') {
+      pendingGraphic = n;
+      document.getElementById('sc-graphic').value = n;
+      document.getElementById('val-graphic').textContent = n;
+      setScoreState('abstraction');
+    } else if (scoreState === 'abstraction' || scoreState === 'confirm') {
+      pendingAbstraction = n;
+      document.getElementById('sc-abstract').value = n;
+      document.getElementById('val-abstract').textContent = n;
+      setScoreState('confirm');
+    }
+    return;
+  }
+
+  // Enter: 確定して次へ（AIレコードのみ）
+  if (e.key === 'Enter' && scoreState === 'confirm' && filtered[currentIndex]?.source !== 'human') {
+    e.preventDefault();
+    const record = filtered[currentIndex];
+    const prevScore = record.score ? { ...record.score } : null;
+    document.getElementById('score-status').textContent = '保存中…';
+    const ok = await saveScore(pendingGraphic, pendingAbstraction);
+    if (ok) {
+      scoreUndoStack.push({ index: currentIndex, prevScore });
+      currentIndex = (currentIndex + 1) % filtered.length;
+      await renderLightbox();
+      resetScoreState();
+    }
+    return;
+  }
+
+  // Backspace: ひとつ前の入力に戻る
+  if (e.key === 'Backspace') {
+    if (scoreState === 'confirm' || scoreState === 'abstraction') {
+      pendingAbstraction = null;
+      setScoreState('abstraction');
+    } else if (scoreState === 'abstraction') {
+      setScoreState('graphic');
+    }
+    return;
+  }
+
+  if (e.key === 'ArrowLeft')  { currentIndex = (currentIndex - 1 + filtered.length) % filtered.length; await renderLightbox(); resetScoreState(); }
+  if (e.key === 'ArrowRight') { currentIndex = (currentIndex + 1) % filtered.length; await renderLightbox(); resetScoreState(); }
+  if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('open');
+});
+document.getElementById('lightbox').addEventListener('click', e => {
+  if (e.target === document.getElementById('lightbox')) {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+});
+
+// ===== ゴミ箱モード =====
+async function enterTrashMode() {
+  trashMode = true;
+  document.getElementById('btn-trash-view').classList.add('active');
+  document.querySelectorAll('.source-btn[data-source]').forEach(b => b.classList.remove('active'));
+  document.getElementById('filter-bar').style.display = 'none';
+  document.getElementById('trash-banner').classList.add('show');
+
+  try {
+    const res = await fetch('/api/trash-list');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    trashRecords = await res.json();
+    trashRecords.reverse();
+  } catch (e) {
+    console.error('trash-list fetch failed:', e);
+    document.getElementById('trash-banner').textContent = 'ゴミ箱の読み込みに失敗しました。Viteサーバーを再起動してください。';
+    return;
+  }
+
+  filtered = trashRecords;
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+
+  if (filtered.length === 0) {
+    const msg = document.createElement('p');
+    msg.style.cssText = 'padding:40px;color:rgba(0,0,0,0.3);letter-spacing:2px;font-size:13px;';
+    msg.textContent = 'ゴミ箱は空です';
+    grid.appendChild(msg);
+    return;
+  }
+
+  for (let i = 0; i < filtered.length; i++) {
+    const card = await makeCard(filtered[i], i);
+    card.classList.add('trashed');
+    grid.appendChild(card);
+  }
+}
+
+function exitTrashMode() {
+  trashMode = false;
+  document.getElementById('btn-trash-view').classList.remove('active');
+  document.getElementById('filter-bar').style.display = '';
+  document.getElementById('trash-banner').classList.remove('show');
+  // 元のフィルターに戻す
+  const activeSourceBtn = document.querySelector('.source-btn[data-source].active');
+  if (!activeSourceBtn) {
+    document.querySelector('.source-btn[data-source="all"]').classList.add('active');
+    currentSourceFilter = 'all';
+  }
+  applyFilter(currentThemeFilter);
+}
+
+// ゴミ箱へ（ライトボックスから）
+document.getElementById('lb-trash-btn').addEventListener('click', async () => {
+  const record = filtered[currentIndex];
+  if (!record) return;
+  const res = await fetch('/api/trash', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ symbol_id: record.symbol_id, timestamp: record.timestamp }),
+  });
+  const data = await res.json();
+  if (!data.ok) return;
+
+  allRecords = allRecords.filter(r => r !== record);
+  filtered   = filtered.filter(r   => r !== record);
+  document.querySelectorAll('#grid .card')[currentIndex]?.remove();
+
+  document.getElementById('lightbox').classList.remove('open');
+  currentIndex = Math.min(currentIndex, filtered.length - 1);
+});
+
+// 復元（ライトボックスから）
+document.getElementById('lb-restore-btn').addEventListener('click', async () => {
+  const record = filtered[currentIndex];
+  if (!record) return;
+  const res = await fetch('/api/restore', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ symbol_id: record.symbol_id, timestamp: record.timestamp }),
+  });
+  const data = await res.json();
+  if (!data.ok) return;
+
+  trashRecords = trashRecords.filter(r => r !== record);
+  filtered     = filtered.filter(r    => r !== record);
+  document.querySelectorAll('#grid .card')[currentIndex]?.remove();
+
+  document.getElementById('lightbox').classList.remove('open');
+  if (filtered.length === 0) { exitTrashMode(); return; }
+  currentIndex = Math.min(currentIndex, filtered.length - 1);
+});
+
+// ===== 解釈 編集UI =====
+function showInterpEdit() {
+  const record = filtered[currentIndex];
+  document.getElementById('lb-interp-textarea').value = record.interpretation || '';
+  document.getElementById('lb-interp-edit-form').style.display = '';
+  document.getElementById('lb-interp-add-btn').style.display  = 'none';
+  document.getElementById('lb-interp-edit-btn').style.display = 'none';
+  document.getElementById('lb-interpretation').style.display  = 'none';
+  document.getElementById('lb-interp-textarea').focus();
+}
+function hideInterpEdit() {
+  const record = filtered[currentIndex];
+  document.getElementById('lb-interp-edit-form').style.display = 'none';
+  if (record.interpretation) {
+    document.getElementById('lb-interpretation').textContent = record.interpretation;
+    document.getElementById('lb-interpretation').style.display = '';
+    document.getElementById('lb-interp-edit-btn').style.display = '';
+    document.getElementById('lb-interp-add-btn').style.display  = 'none';
+  } else {
+    document.getElementById('lb-interpretation').style.display = 'none';
+    document.getElementById('lb-interp-add-btn').style.display  = '';
+    document.getElementById('lb-interp-edit-btn').style.display = 'none';
+  }
+}
+
+document.getElementById('lb-interp-add-btn').addEventListener('click', showInterpEdit);
+document.getElementById('lb-interp-edit-btn').addEventListener('click', showInterpEdit);
+document.getElementById('lb-interp-cancel-btn').addEventListener('click', hideInterpEdit);
+
+document.getElementById('lb-interp-save-btn').addEventListener('click', async () => {
+  const record = filtered[currentIndex];
+  const text = document.getElementById('lb-interp-textarea').value.trim();
+  if (!record) return;
+  try {
+    const res = await fetch('/api/update-interpretation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        symbol_id: record.symbol_id || null,
+        timestamp: record.timestamp || null,
+        interpretation: text,
+      }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      if (text) record.interpretation = text;
+      else delete record.interpretation;
+      // カードの解釈プレビューも更新
+      const idx = filtered.indexOf(record);
+      const cards = document.querySelectorAll('#grid .card');
+      const card = cards[idx];
+      if (card) {
+        let cardInterp = card.querySelector('.card-interp');
+        if (text) {
+          if (!cardInterp) {
+            cardInterp = document.createElement('div');
+            cardInterp.className = 'card-interp';
+            card.querySelector('.card-footer').appendChild(cardInterp);
+          }
+          cardInterp.textContent = text;
+        } else {
+          cardInterp?.remove();
+        }
+      }
+      hideInterpEdit();
+    }
+  } catch (_) {}
+});
+
+// Textarea内でのキーボードショートカット（Cmd/Ctrl+Enter で保存）
+document.getElementById('lb-interp-textarea').addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById('lb-interp-save-btn').click();
+  }
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    hideInterpEdit();
+  }
+  e.stopPropagation(); // ライトボックスのキーハンドラを止める
+});
+
+// ── 研究パネル ──────────────────────────────────────────────────────────────
+
+const TAG_LABELS = {
+  single_heavy_removal:            '単漢字・大量除去',
+  single_partial_removal:          '単漢字・部分除去',
+  single_intact:                   '単漢字・原形保持',
+  dual_overlap:                    '二字重畳',
+  dual_horizontal:                 '二字横並び',
+  dual_vertical:                   '二字縦積み',
+  dual_diagonal:                   '二字斜め配置',
+  dual_complementary_horizontal:   '二字相補（横）',
+  dual_complementary_vertical:     '二字相補（縦）',
+  repeated_overlap:                '同字重畳',
+  repeated_horizontal:             '同字横並び',
+  repeated_vertical:               '同字縦積み',
+  triple_composition:              '三字組み合わせ',
+  triple_repeated:                 '三字反復',
+  multi_kanji:                     '多漢字複合',
+  rotated:                         '回転あり',
+  anisotropic_scale:               '異方性スケール',
+};
+
+function renderResearchPanel(data) {
+  const ts = data.generated_at
+    ? new Date(data.generated_at).toLocaleString('ja-JP')
+    : '未解析';
+  const llmLabel = data.llm_used ? '· AI解析済み' : '· AI未使用（再解析でAI命名が追加されます）';
+  document.getElementById('research-timestamp').textContent =
+    `${ts} / ${data.total_records || 0}件分析 ${llmLabel}`;
+
+  // philosophy
+  const philEl = document.getElementById('research-philosophy');
+  if (data.philosophy?.summary) {
+    philEl.innerHTML = `<strong>創作哲学</strong>${escHtml(data.philosophy.summary)}`;
+    philEl.style.display = '';
+  } else {
+    philEl.style.display = 'none';
+  }
+
+  // patterns
+  const grid = document.getElementById('research-patterns-grid');
+  grid.innerHTML = '';
+  if (!data.patterns?.length) {
+    grid.innerHTML = '<p style="color:rgba(0,0,0,0.3);font-size:12px;letter-spacing:2px">パターンなし（再解析を実行してください）</p>';
+    return;
+  }
+
+  for (const p of data.patterns) {
+    const card = document.createElement('div');
+    card.className = 'research-card';
+
+    const tagLabel = TAG_LABELS[p.tag] || p.tag;
+    const nameDiffers = p.name !== p.tag;
+
+    const topChars = (p.top_chars || []).slice(0, 8).map(([c]) => c);
+
+    const modifiers = (p.modifier_tags || [])
+      .filter(t => TAG_LABELS[t])
+      .map(t => `<span class="research-mod-chip">${TAG_LABELS[t]}</span>`)
+      .join('');
+
+    card.style.cursor = 'pointer';
+    card.title = 'クリックしてこのパターンの記号を表示';
+    card.innerHTML = `
+      <div class="research-card-header">
+        <span class="research-card-name">${escHtml(nameDiffers ? p.name : tagLabel)}</span>
+        <span class="research-card-tag">${escHtml(tagLabel)}</span>
+        <span class="research-card-count">${p.count}件 →</span>
+      </div>
+      ${p.description ? `<div class="research-card-desc">${escHtml(p.description)}</div>` : ''}
+      ${p.effect ? `<div class="research-card-effect">${escHtml(p.effect)}</div>` : ''}
+      ${p.potential ? `<div class="research-card-potential">${escHtml(p.potential)}</div>` : ''}
+      ${topChars.length ? `<div class="research-card-chars">${topChars.map(c => `<span class="research-char-chip">${c}</span>`).join('')}</div>` : ''}
+      ${modifiers ? `<div class="research-modifier-tags">${modifiers}</div>` : ''}
+    `;
+    card.addEventListener('click', () => {
+      enterClusterView(nameDiffers ? p.name : tagLabel, p.record_ids || []);
+    });
+    grid.appendChild(card);
+  }
+
+  // ── discoveries (stage 2) ──
+  const dgrid = document.getElementById('research-discoveries-grid');
+  dgrid.innerHTML = '';
+  if (!data.discoveries?.length) {
+    dgrid.innerHTML = '<p style="color:rgba(0,0,0,0.3);font-size:12px;letter-spacing:2px">未解析（再解析を実行してください）</p>';
+    return;
+  }
+
+  for (const d of data.discoveries) {
+    const card = document.createElement('div');
+    const isHigh = d.novelty_score >= 0.4;
+    card.className = 'discovery-card' + (isHigh ? ' high-novelty' : '');
+
+    const barWidth = Math.round(d.novelty_score * 100);
+    const novLabel = d.novelty_score >= 0.5 ? '高新規性' :
+                     d.novelty_score >= 0.3 ? '中新規性' : '既知構造';
+
+    // rule distribution chips
+    const ruleChips = Object.entries(d.rule_distribution || {})
+      .sort((a, b) => b[1] - a[1])
+      .map(([tag, cnt]) => `<span class="discovery-rule-chip">${TAG_LABELS[tag] || tag} ×${cnt}</span>`)
+      .join('');
+
+    // feat summary mini stats
+    const fs = d.feat_summary || {};
+    const statsLine = [
+      fs.avg_n !== undefined ? `漢字数平均${fs.avg_n}` : '',
+      fs.avg_removal !== undefined ? `除去率${Math.round(fs.avg_removal * 100)}%` : '',
+      fs.max_containment > 0.15 ? `入れ子傾向${Math.round(fs.max_containment * 100)}%` : '',
+      fs.scale_contrast > 2 ? `サイズ差${fs.scale_contrast.toFixed(1)}倍` : '',
+      fs.has_rotation ? '回転あり' : '',
+    ].filter(Boolean).join('  ·  ');
+
+    const examplesHtml = (d.examples_sample || []).slice(0, 3)
+      .map(e => `<div>${escHtml(e)}</div>`).join('');
+
+    card.style.cursor = 'pointer';
+    card.title = 'クリックしてこのクラスタの記号を表示';
+    card.innerHTML = `
+      <div class="discovery-novelty-bar" style="width:${barWidth}%"></div>
+      <div class="discovery-card-name">${escHtml(d.name)}</div>
+      <div class="discovery-meta">
+        <span class="discovery-novelty-badge">新規性 ${Math.round(d.novelty_score * 100)}% · ${novLabel}</span>
+        <span class="discovery-count">${d.count}件 →</span>
+        ${statsLine ? `<span style="font-size:9px;color:rgba(0,0,0,0.28);letter-spacing:0.5px">${escHtml(statsLine)}</span>` : ''}
+      </div>
+      ${d.algorithm ? `<div class="discovery-algorithm">${escHtml(d.algorithm)}</div>` : ''}
+      ${d.visual_principle ? `<div class="discovery-visual">${escHtml(d.visual_principle)}</div>` : ''}
+      ${d.novel_aspect ? `<div class="discovery-novel-aspect">"${escHtml(d.novel_aspect)}"</div>` : ''}
+      ${d.ids_relation ? `<div style="font-size:10px;color:rgba(0,0,0,0.3);margin-bottom:6px;line-height:1.5">${escHtml(d.ids_relation)}</div>` : ''}
+      ${ruleChips ? `<div class="discovery-rule-dist">${ruleChips}</div>` : ''}
+      ${examplesHtml ? `<div class="discovery-examples">${examplesHtml}</div>` : ''}
+    `;
+    card.addEventListener('click', () => {
+      enterClusterView(d.name, d.record_ids || []);
+    });
+    dgrid.appendChild(card);
+  }
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+async function loadResearch() {
+  try {
+    const data = await fetch('/api/research').then(r => r.json());
+    renderResearchPanel(data);
+  } catch (e) {
+    document.getElementById('research-timestamp').textContent = '読み込み失敗';
+  }
+}
+
+function enterResearchMode() {
+  document.getElementById('grid').style.display = 'none';
+  document.getElementById('filter-bar').style.display = 'none';
+  document.getElementById('trash-banner').classList.remove('show');
+  document.getElementById('cluster-banner').classList.remove('show');
+  document.getElementById('btn-trash-view').classList.remove('active');
+  document.getElementById('btn-research-view').classList.add('active');
+  document.querySelectorAll('.source-btn[data-source]').forEach(b => b.classList.remove('active'));
+  document.getElementById('research-panel').classList.add('show');
+  loadResearch();
+}
+
+function exitResearchMode() {
+  document.getElementById('research-panel').classList.remove('show');
+  document.getElementById('btn-research-view').classList.remove('active');
+  document.getElementById('grid').style.display = '';
+}
+
+function enterClusterView(name, recordIds) {
+  researchClusterFilter = { name, record_ids: new Set(recordIds) };
+  exitResearchMode();
+
+  // reset source/theme to all
+  currentSourceFilter = 'all';
+  document.querySelectorAll('.source-btn[data-source]').forEach(b => {
+    b.classList.toggle('active', b.dataset.source === 'all');
+  });
+  document.getElementById('filter-bar').style.display = '';
+
+  // show banner
+  document.getElementById('cluster-banner-name').textContent =
+    `「${name}」— ${recordIds.length}件`;
+  document.getElementById('cluster-banner').classList.add('show');
+
+  applyFilter('all');
+}
+
+document.getElementById('cluster-banner-clear').addEventListener('click', () => {
+  researchClusterFilter = null;
+  document.getElementById('cluster-banner').classList.remove('show');
+  applyFilter(currentThemeFilter);
+});
+
+document.getElementById('btn-research-view').addEventListener('click', () => {
+  if (document.getElementById('btn-research-view').classList.contains('active')) {
+    exitResearchMode();
+    // restore default source filter
+    const allBtn = document.querySelector('.source-btn[data-source="all"]');
+    if (allBtn) allBtn.click();
+  } else {
+    enterResearchMode();
+  }
+});
+
+document.getElementById('btn-research-run').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-research-run');
+  const status = document.getElementById('research-status');
+  btn.disabled = true;
+  status.textContent = '';
+
+  try {
+    // MLXが起動していなければ自動起動
+    const mlxCheck = await fetch('/api/mlx-status').then(r => r.json()).catch(() => ({ running: false }));
+    if (!mlxCheck.running) {
+      btn.textContent = 'AIモデル起動中…';
+      status.textContent = '初回は30秒ほどかかります';
+      await fetch('/api/mlx-start', { method: 'POST' });
+      let started = false;
+      for (let i = 0; i < 60; i++) {
+        await new Promise(r => setTimeout(r, 1000));
+        const st = await fetch('/api/mlx-status').then(r => r.json()).catch(() => ({ running: false }));
+        if (st.running) { started = true; break; }
+        status.textContent = `AIモデル起動中… ${i + 1}秒`;
+      }
+      if (!started) {
+        status.textContent = 'AIモデル起動失敗 — AIなしで解析します';
+        await new Promise(r => setTimeout(r, 2000));
+      }
+    }
+
+    btn.textContent = '解析中…';
+    status.textContent = '';
+    await fetch('/api/research', { method: 'POST' });
+
+    // poll until patterns.json is updated (up to 120s — LLM calls take time)
+    const startTs = document.getElementById('research-timestamp').textContent;
+    let attempts = 0;
+    const poll = setInterval(async () => {
+      attempts++;
+      const data = await fetch('/api/research').then(r => r.json()).catch(() => null);
+      if (data?.generated_at) {
+        const newTs = new Date(data.generated_at).toLocaleString('ja-JP');
+        if (newTs !== startTs || attempts > 5) {
+          clearInterval(poll);
+          renderResearchPanel(data);
+          btn.disabled = false;
+          btn.textContent = '再解析';
+          status.textContent = data.llm_used ? 'AI解析完了' : '完了（AI未使用）';
+          setTimeout(() => { status.textContent = ''; }, 4000);
+        }
+      }
+      if (attempts > 120) {
+        clearInterval(poll);
+        btn.disabled = false;
+        btn.textContent = '再解析';
+        status.textContent = 'タイムアウト';
+      }
+    }, 1000);
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = '再解析';
+    status.textContent = 'エラー';
+  }
+});
+
+init();
+</script>
+</body>
+</html>

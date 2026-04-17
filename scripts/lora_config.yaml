@@ -1,0 +1,9 @@
+# LoRA fine-tuning configuration for IDS Symbol Renderer
+# v2: 過学習抑制設定
+#   rank 16→8:  学習パラメータ数を半減（記憶容量を下げる）
+#   dropout 0.05→0.10: 特定パターンへの過依存を防ぐ
+lora_parameters:
+  rank: 8
+  alpha: 16
+  dropout: 0.10
+  scale: 10.0

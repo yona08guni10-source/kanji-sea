@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>IDS Symbol Renderer</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+
+  <!-- 範囲選択の枠（画面固定オーバーレイ） -->
+  <div id="sel-rect"></div>
+
+  <!-- 保存オーバーレイ -->
+  <div id="save-overlay" aria-hidden="true">
+    <div id="save-overlay-inner">
+      <div id="overlay-check">✓</div>
+      <div id="overlay-label">保存しました</div>
+      <div id="overlay-theme"></div>
+      <div id="overlay-detail"></div>
+    </div>
+  </div>
+
+  <!-- お題 -->
+  <section id="theme-section">
+    <div id="theme-display">
+      <span class="label">お題</span>
+      <span id="theme-text">—</span>
+      <span id="theme-count" style="display:none"></span>
+    </div>
+    <div id="theme-controls">
+      <select id="theme-select">
+        <option value="">— 選択 —</option>
+      </select>
+      <input type="text" id="theme-input" placeholder="新しいお題を追加…" />
+      <button id="btn-add-theme">追加</button>
+    </div>
+  </section>
+
+  <!-- 漢字選択（単一ピッカー） -->
+  <section id="kanji-section">
+    <div id="history-btns">
+      <button id="btn-undo" disabled title="元に戻す (⌘Z)">↩ 戻す</button>
+      <button id="btn-redo" disabled title="やり直す (⌘⇧Z)">↪ やり直す</button>
+    </div>
+
+    <div class="kanji-picker" id="picker-0">
+      <button class="picker-current" id="picker-btn-0">火</button>
+      <div class="picker-popover" id="picker-pop-0" hidden>
+        <input class="picker-search" placeholder="漢字・読みで検索…" autocomplete="off" spellcheck="false">
+        <div class="picker-grid"></div>
+      </div>
+    </div>
+    <button id="btn-add-kanji">キャンバスに追加</button>
+  </section>
+
+  <!-- メインエリア -->
+  <div id="main-area">
+
+    <!-- キャンバス -->
+    <div id="canvas-wrap">
+      <svg id="canvas" viewBox="0 0 109 109"
+           xmlns="http://www.w3.org/2000/svg">
+        <rect id="canvas-bg" width="109" height="109" fill="white"/>
+        <line x1="54.5" y1="0" x2="54.5" y2="109" stroke="#eee" stroke-width="0.3"/>
+        <line x1="0" y1="54.5" x2="109" y2="54.5" stroke="#eee" stroke-width="0.3"/>
+        <rect width="109" height="109" fill="none" stroke="#ccc" stroke-width="0.5"/>
+      </svg>
+      <!-- 範囲選択後の削除バー -->
+      <div id="selection-bar" style="display:none">
+        <span id="selection-count"></span>
+        <button id="btn-delete-selection">省略 (Del)</button>
+        <button id="btn-clear-selection">×</button>
+      </div>
+    </div>
+
+    <!-- コントロールパネル -->
+    <aside id="controls">
+      <div id="no-active">
+        漢字を選んで「追加」→<br>
+        クリックで選択、ドラッグで移動<br>
+        <span>空きエリアをドラッグで範囲選択</span>
+      </div>
+
+      <div id="active-panel" style="display:none">
+        <div id="active-title"></div>
+
+        <div class="section-label">位置・変形</div>
+        <div class="sl-row">
+          <label>X</label>
+          <input type="range" id="sl-x" min="-109" max="109" step="0.5" value="0">
+          <span id="val-x">0.0</span>
+        </div>
+        <div class="sl-row">
+          <label>Y</label>
+          <input type="range" id="sl-y" min="-109" max="109" step="0.5" value="0">
+          <span id="val-y">0.0</span>
+        </div>
+        <div class="sl-row">
+          <label>回転</label>
+          <input type="range" id="sl-r" min="-180" max="180" step="1" value="0">
+          <span id="val-r">0°</span>
+        </div>
+        <div class="sl-row">
+          <label>拡縮</label>
+          <input type="range" id="sl-s" min="0.1" max="3" step="0.05" value="1">
+          <span id="val-s">1.00</span>
+        </div>
+        <div class="sl-row">
+          <label>X幅</label>
+          <input type="range" id="sl-sx" min="0.1" max="3" step="0.05" value="1">
+          <span id="val-sx">1.00</span>
+        </div>
+        <div class="sl-row">
+          <label>Y幅</label>
+          <input type="range" id="sl-sy" min="0.1" max="3" step="0.05" value="1">
+          <span id="val-sy">1.00</span>
+        </div>
+        <div class="sl-row">
+          <label>開X</label>
+          <input type="range" id="sl-spx" min="-40" max="40" step="0.5" value="0">
+          <span id="val-spx">0.0</span>
+        </div>
+        <div class="sl-row">
+          <label>開Y</label>
+          <input type="range" id="sl-spy" min="-40" max="40" step="0.5" value="0">
+          <span id="val-spy">0.0</span>
+        </div>
+
+        <div class="section-label" style="margin-top:14px">
+          筆画の構成
+          <span id="stroke-summary"></span>
+        </div>
+        <div id="stroke-list"></div>
+
+        <button id="btn-remove-kanji">この漢字を削除</button>
+      </div>
+
+      <!-- AI解釈表示（AI提案生成後に表示） -->
+      <div id="ai-interpretation" style="display:none">
+        <hr>
+        <div class="section-label">解釈</div>
+        <div id="ai-interp-text"></div>
+      </div>
+
+      <!-- AI感想（修正前）- 惜しいと思った時に記録 -->
+      <div id="ai-comment-section" style="display:none">
+        <div class="section-label">修正前の感想</div>
+        <textarea id="ai-comment-input" placeholder="惜しいと思った点、気になった点…" rows="5"></textarea>
+      </div>
+
+      <!-- AI採点パネル（AI提案生成後に表示） -->
+      <div id="ai-score-panel" style="display:none">
+        <hr>
+        <div class="section-label" id="ai-score-label">AI提案を採点</div>
+        <div class="sl-row">
+          <label>グラフィック</label>
+          <input type="range" id="ai-sc-g" min="0" max="9" step="1" value="5">
+          <span id="ai-val-g">5</span>
+        </div>
+        <div class="sl-row">
+          <label>抽象化</label>
+          <input type="range" id="ai-sc-a" min="0" max="9" step="1" value="5">
+          <span id="ai-val-a">5</span>
+        </div>
+        <button id="btn-score-ai">採点を保存</button>
+        <div id="ai-score-status"></div>
+      </div>
+
+      <hr>
+      <!-- 選択理由 -->
+      <div id="interp-section">
+        <div class="section-label">選択理由</div>
+        <textarea id="interp-input" placeholder="なぜこの漢字を選んだか…"></textarea>
+      </div>
+      <button id="btn-generate">AI提案</button>
+      <button id="btn-save">これだ</button>
+      <div id="canvas-chars"></div>
+      <div id="save-status"></div>
+    </aside>
+
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
