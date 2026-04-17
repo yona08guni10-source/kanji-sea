@@ -13,6 +13,10 @@ dist-ssr
 *.local
 .env
 
+# モデル・学習データ（容量が大きいためgit管理外）
+models/
+finetune_data/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
