@@ -30,6 +30,20 @@ elif CKPT.exists():
 else:
     print("  警告: モデルが見つかりません。HF_MODEL_REPO 環境変数を設定してください。")
 
+# ── 漢字画像をHF Hubからダウンロード・展開 ────────────────────────────────────
+KANJI_DIR = ROOT / "data" / "noto_kanji_sans" / "kanji"
+if not KANJI_DIR.exists() and HF_REPO:
+    print(f"  漢字画像をダウンロード中: {HF_REPO}")
+    from huggingface_hub import hf_hub_download
+    import shutil, tarfile
+    tar_path = hf_hub_download(repo_id=HF_REPO, filename="data/kanji_images.tar.gz", repo_type="model")
+    KANJI_DIR.parent.mkdir(parents=True, exist_ok=True)
+    with tarfile.open(tar_path, "r:gz") as tar:
+        tar.extractall(path=str(ROOT / "data"))
+    print(f"  完了: {len(list(KANJI_DIR.glob('*.png')))}枚")
+elif KANJI_DIR.exists():
+    print(f"  漢字画像: {KANJI_DIR} (ローカル, {len(list(KANJI_DIR.glob('*.png')))}枚)")
+
 # ── 各ツールをバックグラウンド起動 ───────────────────────────────────────────
 TOOLS = [
     (7865, "tsne_ui.py",       "漢字 t-SNE 探索"),
