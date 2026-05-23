@@ -386,7 +386,7 @@ canvas.addEventListener('mouseleave',()=>{ tooltip.style.display='none'; });
 // ── 選択 ─────────────────────────────────────────────────────────────────────
 async function selectChar(char){
   status(`検索中… ${char}`);
-  const r=await fetch(`/api/search?q=${encodeURIComponent(char)}&n=16`);
+  const r=await fetch(`api/search?q=${encodeURIComponent(char)}&n=16`);
   const d=await r.json();
   if(d.error){status(d.error);return;}
 
@@ -487,7 +487,7 @@ function status(msg){ document.getElementById('status').textContent=msg; }
 
 // ── 初期化 ───────────────────────────────────────────────────────────────────
 async function init(){
-  const r=await fetch('/api/data');
+  const r=await fetch('api/data');
   data=await r.json();
   N=data.nx.length;
   buildGroups();

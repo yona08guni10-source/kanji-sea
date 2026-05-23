@@ -544,7 +544,7 @@ async function submitChar() {
   const raw = charInput.value.trim();
   closeOverlay();
   if (!raw) return;
-  await fetch('/api/select', {
+  await fetch('api/select', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ chars: raw })
