@@ -14,12 +14,14 @@ PYTHON  = sys.executable
 HF_REPO = os.environ.get("HF_MODEL_REPO", "")
 
 TOOLS = [
+    # 軽量ツール（numpy+PIL のみ、PyTorch不要）
     (7865, "tsne_ui.py",       "漢字 t-SNE 探索"),
-    (7864, "tree_ui.py",       "漢字樹形図"),
-    (7868, "symbol_ui.py",     "漢字モーフィング"),
-    (7863, "morph_ui.py",      "漢字連鎖モーフィング"),
-    (7861, "tetra_ui.py",      "正四面体 重力場"),
-    (7866, "projection_ui.py", "記号の海"),
+    # 重量ツール（PyTorch+モデル必要）→ RAM不足のため要有料プラン
+    # (7864, "tree_ui.py",       "漢字樹形図"),
+    # (7868, "symbol_ui.py",     "漢字モーフィング"),
+    # (7863, "morph_ui.py",      "漢字連鎖モーフィング"),
+    # (7861, "tetra_ui.py",      "正四面体 重力場"),
+    # (7866, "projection_ui.py", "記号の海"),
 ]
 
 def setup_and_launch():
