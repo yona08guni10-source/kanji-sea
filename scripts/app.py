@@ -53,6 +53,6 @@ for port, script, name in TOOLS:
 
 print()
 
-# ── proxy_ui.py をポート 7860 で起動（HF Spaces 公開ポート）─────────────────
-os.environ["PROXY_PORT"] = "7860"
+# ── proxy_ui.py を公開ポートで起動（HF Spaces: 7860, Render: $PORT）────────
+os.environ["PROXY_PORT"] = os.environ.get("PORT", "7860")
 exec(open(str(SCRIPTS / "proxy_ui.py")).read())

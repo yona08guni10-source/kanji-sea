@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: kanji-sea
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: HF_MODEL_REPO
+        value: ""  # デプロイ後にRenderのダッシュボードで設定: andotakahiro/kanji-diffusion
+    healthCheckPath: /
+    autoDeploy: false

@@ -14,8 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # アプリケーション本体
 COPY . .
 
-# HF Spaces はポート 7860 を使用
+# PORT は環境変数で上書き可能（HF Spaces: 7860, Render: 動的）
 ENV PORT=7860
-EXPOSE 7860
+EXPOSE $PORT
 
 CMD ["python", "scripts/app.py"]
